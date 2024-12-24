@@ -107,7 +107,8 @@
 
 ## v-if和v-for不建议一起使用：
   同时使用 v-if 和 v-for 是不推荐的，因为这样二者的优先级不明显
-  当 v-if 和 v-for 同时存在于一个元素上的时候，v-if 会首先被执行
+  vue3: 当 v-if 和 v-for 同时存在于一个元素上的时候，v-if 会首先被执行
+  Vue2: 当 v-if 和 v-for 同时存在于一个元素上的时候, v-for 的优先级高于 v-if
 
 
 ## 首屏加载慢的原因：
@@ -225,7 +226,7 @@
     .lazy
   - 事件修饰符
     .prevent: 阻止默认事preventDefault()
-    .stop: 阻止默认事件stopPropagation()
+    .stop: 阻止冒泡事件stopPropagation()
     .self: 只当事件目标是元素本身时触发事件处理函数
     .once: 只触发一次
     .capture: 事件捕获模式
@@ -819,3 +820,8 @@
         }
       }
     ```
+
+## vue2如何实现对数组和对象的响应式
+  - vue2中，对数组和对象的响应式是通过Object.defineProperty()方法实现的，对对象进行响应式处理时，会遍历对象的所有属性，对每个属性都调用Object.defineProperty()方法，对数组进行响应式处理时，会遍历数组的所有元素，对每个元素都调用Object.defineProperty()方法，这样就实现了对数组和对象的响应式处理。对数组是通过重写数组方法来实现的数组的响应式的。
+  - vue3是使用proxy来实现对象和数组的响应式
+  - vue2中对新增对象属性的处理：this.$set(this.obj, 'newKey', 'newValue'), Object.assign(),computed

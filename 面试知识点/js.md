@@ -2251,5 +2251,16 @@ ES6新增的Set、Map如何理解
 
   ```
 
+## import和require的区别
+  - 意义
+    - import: import 是 ES6 模块语法，用于导入其他模块的成员
+    - require: require 是 CommonJS 模块语法，用于导入其他模块的成员
+  - 加载时机
+    - import: 静态加载，在编译时执行
+    - require: 动态加载，在运行时执行
+  - 异步加载
+    - import: 可以使用 async/await 进行异步加载
+    - require: 本身是同步的，但是可以通过 require.async 或 require.ensure 进行异步加载(webpack)
+
 
 
