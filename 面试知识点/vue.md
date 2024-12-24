@@ -824,4 +824,82 @@
 ## vue2如何实现对数组和对象的响应式
   - vue2中，对数组和对象的响应式是通过Object.defineProperty()方法实现的，对对象进行响应式处理时，会遍历对象的所有属性，对每个属性都调用Object.defineProperty()方法，对数组进行响应式处理时，会遍历数组的所有元素，对每个元素都调用Object.defineProperty()方法，这样就实现了对数组和对象的响应式处理。对数组是通过重写数组方法来实现的数组的响应式的。
   - vue3是使用proxy来实现对象和数组的响应式
-  - vue2中对新增对象属性的处理：this.$set(this.obj, 'newKey', 'newValue'), Object.assign(),computed
+  - vue2中对新增对象属性的处理：this.$set(this.obj, 'newKey', 'newValue'), Object.assign(),computed，forceUpdate()
+
+## 按需加载(也称为懒加载或动态导入)
+  - 是一种优化技术，用于减少初始加载时间和提高应用性能
+  - 按需加载的实现方式：
+    - 路由级别的按需加载
+      ```javascript
+        import { createRouter, createWebHistory } from 'vue-router'
+
+        const routes = [
+          {
+            path: '/home',
+            name: 'Home',
+            component: () => import('./views/Home.vue')
+          },
+          {
+            path: '/about',
+            name: 'About',
+            component: () => import('./views/About.vue')
+          }
+        ]
+
+        const router = createRouter({
+          history: createWebHistory(),
+          routes
+        })
+
+      ```
+    - 组件级别的按需加载
+      ```javascript
+        <script setup>
+        import { defineAsyncComponent } from 'vue'
+
+        const HeavyComponent = defineAsyncComponent(() => 
+          import('./components/HeavyComponent.vue')
+        )
+        </script>
+
+        <template>
+          <HeavyComponent v-if="showHeavyComponent" />
+        </template>
+      ```
+    - 条件渲染的按需加载，使用v-if和v-else
+      ```javascript
+        <script setup>
+        import { defineAsyncComponent } from 'vue'
+
+        const HeavyComponent = defineAsyncComponent(() =>
+          import('./components/HeavyComponent.vue')
+        )
+        </script>
+
+        <template>
+          <HeavyComponent v-if="showHeavyComponent" />
+          <div v-else>Loading...</div>
+        </template>
+      ```
+    - 使用Suspense组件
+      ```javascript
+        <template>
+          <Suspense>
+            <template #default>
+              <AsyncComponent />
+            </template>
+            <template #fallback>
+              <div>Loading...</div>
+            </template>
+          </Suspense>
+        </template>
+
+        <script setup>
+        import { defineAsyncComponent } from 'vue'
+
+        const AsyncComponent = defineAsyncComponent(() => 
+          import('./components/AsyncComponent.vue')
+        )
+        </script>
+      ```
+
