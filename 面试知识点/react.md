@@ -1553,7 +1553,7 @@
 
   ```
 
-## react
+## react router
   - 基本概念
     - BrowserRouter：用于创建一个路由器，它会监听 URL 的变化并将 URL 映射到组件
     - Route：用于定义路由规则，它会匹配 URL 并渲染相应的组件
