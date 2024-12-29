@@ -903,3 +903,702 @@
         </script>
       ```
 
+## composition Api是什么
+  - 组合式API是Vue3中引入的新特性，它允许开发者使用函数式编程的方式来组织代码，从而提高代码的可读性和可维护性。
+  - 组合式API的优点：
+    - 更好的代码组织和复用性
+    - 更好的代码可读性和可维护性
+  - 主要有ref、reactive、computed、watch、provide、inject、toRefs、toRef、shallowRef
+
+## setup()函数在vue3中气什么作用
+  - setup()是vue3组件选项，是组合式api的入口函数，在组件实例创建之前执行，用于初始化状态、计算属性、方法和生命周期钩子等，并返回在模板中使用的数据和方法
+## ref和reactive的区别
+  - 数据类型
+    - ref适用于基本类型和对象类型，reactive只适用于对象类型
+  - 访问和修改
+    - ref访问和修改数据时，需要使用.value，reactive访问和修改数据时，不需要使用.value
+  - 重新赋值
+    - ref可以直接赋值，reactive不可以直接赋值，会失去响应性
+  - ts类型推断
+    - ref需要显式指定泛型类型，reactive通常可以自动推断类型
+
+## 简述vue3中Suspense组件是如何工作的
+  - 基本结构：Suspense组件有两个插槽：default和fallback，default插槽用于渲染异步组件，fallback插槽用于渲染加载状态
+  - 异步处理：Suspense会尝试渲染deafult插槽，如果遇到异步组件，会暂停渲染，直到异步组件加载完成，然后继续渲染
+  - 加载状态：在异步加载期间，Suspense会渲染fallback插槽
+  - 加载完成：一旦所有的异步操作完成，Suspense会重新渲染default插槽
+  - 错误处理：如果在异步加载过程中发生错误，可以配合onErrorCaptured生命周期钩子来处理错误
+## Teleport组件有什么作用
+  - Teleport组件可以将组件的渲染位置移动到指定的DOM节点上，而不影响组件的逻辑结构
+    ```vue
+      <Teleport to="body">
+        <div v-if="open" class="modal">
+          <p>Hello from the modal!</p>
+          <button @click="open = false">Close</button>
+        </div>
+      </Teleport>
+    ```
+## vue3如何优化性能
+  - 响应式系统优化：使用proxy代替Object.defineProperty
+  - 虚拟dom优化： 静态数提升将静态内容提升，减少渲染开销，静态属性提升将不会改变的属性标记，减少对比，patch flag标记动态内容只更新变化的函数
+  - 编译优化：使用跟高效的编译策略，减少编译时间，基于模板的静态分析，减少运行时的开销
+  - 按需加载：使用动态导入和异步组件实现按需加载
+  - 使用v-once和v-memo来减少不必要的渲染
+  - 合理使用computed和watch来减少不必要的计算
+  - 使用shallowRef和shallowReactive来减少不必要的响应式
+  - 使用keek-alive缓存组件
+  - 虚拟列表
+  - 使用web workers将耗时的计算操作放在web worker中执行
+  - 使用tree-shaking来减少不必要的代码
+
+## provide和reject是如何工作的
+  - 父组件使用provide提供数据，子组件使用inject接收数据
+  ```vue
+    <!--父组件-->
+    <script setup>
+    import { provide } from 'vue'
+    const updateMessage = (newmsg) => {
+      console.log(newmsg)
+    }
+    privide('message', 'Hello, World')
+    privide('updateMessage', updateMessage)
+    </script>
+
+    <!--子组件-->
+    <script setup>
+    import { inject } from 'vue'
+    const message = inject('message')
+    const updateMessage = inject('updateMessage')
+    const changeMessage = () => {
+      updateMessage('Hello, Vue')
+    }
+    </script>
+  ```
+
+## 简述vue3中如何实现响应式
+  - vue3中使用Proxy和Reflect来实现响应式
+  - Proxy可以监听对象的属性变化，Reflect可以实现对对象属性的操作
+  - 使用Proxy监听对象的属性变化，使用Reflect实现对对象属性的操作
+  - 具体工作原理
+    - 1、创建响应式对象：使用reactive或者ref创建响应式对象
+    - 2、创建proxy代理对象：使用Proxy监听对象的属性变化，使用Reflect实现对对象属性的操作
+    - 3、依赖收集：当组件渲染时会访问响应式对象，vue会记录下该属性与当前组件之间的依赖关系
+    - 4、触发更新：当响应式对象的属性被修改时会触发set拦截器，vue会通知依赖该属性的组件进行更新
+    - 5、异步更新队列：vue会将更新操作放入异步更新队列中，多个更新会被合并，避免不必要的更新
+    - 6、虚拟DOM重新渲染：组件重新渲染时会生成新的DOM树，vue会比较新旧DOM树的差异，只更新变化的部分
+## vue3的自定义指令是如何定义的
+  - vue3中的自定义指令由一个包含类似组件生命周期钩子的对象来定义。钩子函数会接收到指令所绑定元素作为其参数
+  - 自定义指令的使用方式：
+    ```javascript
+      const myDirective = {
+        // 在绑定元素的 attribute 前
+        // 或事件监听器应用前调用
+        created(el, binding, vnode) {
+          // 下面会介绍各个参数的细节
+        },
+        // 在元素被插入到 DOM 前调用
+        beforeMount(el, binding, vnode) {},
+        // 在绑定元素的父组件
+        // 及他自己的所有子节点都挂载完成后调用
+        mounted(el, binding, vnode) {},
+        // 绑定元素的父组件更新前调用
+        beforeUpdate(el, binding, vnode, prevVnode) {},
+        // 在绑定元素的父组件
+        // 及他自己的所有子节点都更新后调用
+        updated(el, binding, vnode, prevVnode) {},
+        // 绑定元素的父组件卸载前调用
+        beforeUnmount(el, binding, vnode) {},
+        // 绑定元素的父组件卸载后调用
+        unmounted(el, binding, vnode) {}
+      }
+    ```
+  - 在vue应用中注册：
+    ```javascript
+      const app = createApp(App)
+      app.directive('my-directive', myDirective)
+      app.directive('my-directive', myDirective)
+      app.mount('#app')
+    ```
+  - 自定义指令的使用方式：
+    ```vue
+      <div v-my-directive="value"></div>
+    ```
+## vue3中的路由和vue router4有哪些变化
+  - 1、组合式API支持：提供了新的useRouter()和useRoute()函数来访问路由实例和当前路由信息
+  - 2、引入了新的路由导航守卫：onBeforeRouteLeave()、onBeforeRouteUpdate()
+  - 3、改进了typescript的支持
+  - 4、动态路由增强：新增了addRoute方法用于动态添加路由，移除了router.match方法，改进了router.resolve方法
+  - 5、命名子路由的变化：移除了children配置中的name属性，改为使用扁平化的路由名称
+  - 6、<router-link>组件的变化：移除了tag属性，改用了v-soltAPI来自定义渲染，新增了custom属性，用于创建自定义导航
+  - 7、改进的滚动行为：支持异步滚动
+  - 8、移除了*通配符路由使用带有自定义正则的参数路由来代替
+## vue3中的插槽和vue2中的有何不同
+  - 1、vue3中统一使用v-slot(#)来定义插槽，vue2中使用slot和slot-scope来定义插槽
+  - 2、vue3支持动态插槽
+    ```vue
+      <template v-slot:[SlotName]>
+      </template>
+    ```
+  - 3、vue3引入了新的useSlots和useAttrs函数来访问插槽和属性
+## vue3实现过渡动画
+    ```vue
+      <transition name="fade">
+        <div v-if="show">Hello, World</div>
+      </transition>
+    ```
+    ```css
+      .fade-enter-active, .fade-leave-active {
+        transition: opacity .5s;
+      }
+      .fade-enter-from, .fade-leave-to {
+        opacity: 0;
+      }
+
+    ```
+## vue3如何处理全局状态
+  - 使用vuex来管理全局状态
+    ```javascript
+      import { createStore } from 'vuex'
+      export default createStore({
+        store: {
+          count: 0
+        },
+        mutations: {
+          increment(state) {
+            state.count++
+          }
+        },
+        actions: {
+          increment({ commit }) {
+            commit('increment')
+          }
+        }
+      })
+
+      // main.js
+      import { createApp } from 'vue'
+      import App from './App.vue'
+      import store from './store'
+      const app = createApp(App)
+      app.use(store)
+      app.mount('#app')
+
+      // 使用
+      <script setup>
+        import { useStore } from 'vuex'
+        const store = useStore()
+        const count = computed(() => store.state.count)
+        const increment = () => store.commit('increment')
+      </script>
+    ```
+  - 使用pinia来管理全局状态
+    ```javascript
+      import { createApp } from 'vue'
+      import { createPinia } from 'pinia'
+      import App from './App.vue'
+      const app = createApp(App)
+      const pinia = createPinia()
+      app.use(pinia)
+      app.mount('#app')
+      // store
+      import { defineStore } from 'pinia'
+      export const useCounterStore = defineStore('counter', {
+        state: () => {
+          return {
+            count: 0
+          }
+        },
+        getters: {
+          doubleCount: (state) => state.count * 2
+        },
+        actions: {
+          increment() {
+            this.count++
+          }
+        },
+        persist: {
+          enabled: true,
+          strategies: [
+            {
+              key: 'counter',
+              storage: localStorage
+            }
+          ]
+        }
+      })
+      // 使用
+      <script setup>
+      import { useCounterStore } from '@/store/counter'
+      const counterStore = useCounterStore()
+      const count = computed(() => counterStore.count)
+      </script>
+    ```
+  - 使用响应式api中的reactive来管理全局状态
+  - 使用provide和inject来管理全局状态
+  - 使用自定义订阅发布模式来管理全局状态
+## vue3中的Fragment是什么
+  - vue3的新特性，包含多个根节点的模板被表示为一个片段(Fragment)，可以避免在模板中使用额外的根节点
+## vue3如何支持Fragments
+  ```vue
+    <template>
+      <div>1</div>
+      <div>1</div>
+      <div>1</div>
+    </template>
+  ```
+## setup方法与setup语法糖有什么区别
+  - 用法不同：
+    ```javascript
+      // setup语法糖
+      <script setup></script>
+      // setup方法
+      <script>
+      export default {
+        setup() {
+          // ...
+        }
+      }
+      </script>
+    ```
+  - 返回值处理：setup方法需要显示的返回变量和方法，setup语法糖无需显示返回
+  - props和context
+    ```javascript
+      // setup语法糖
+      <script setup>
+      const props = defineProps(...)
+      const emit = defineEmits(...)
+      const slots = defineSlots(...)
+      </script>
+      // setup方法
+      <script>
+      export default {
+        setup(props, context) {}
+      }
+      </script>
+    ```
+
+## vue3实现混入
+  ```vue
+    <!--vue3-->
+    <script setup>
+      import { ref } from 'vue'
+
+      const foo = ref(1)
+      const bar = ref(2)
+
+      onMounted(() => {
+        console.log(foo.value) // 1
+        console.log(bar.value) // 2
+      })
+
+      const useFoo = () => {
+        return {
+          foo
+        }
+      }
+
+      const useBar = () => {
+        return {
+          bar
+        }
+      }
+    </script>
+  ```
+  ```vue
+    <script setup>
+    import { useFoo, useBar } from './mixins'
+
+    const foo = useFoo()
+    const bar = useBar()
+    </script>
+
+  ```
+  ```javascript
+    // vue2
+    export const myMixin = {
+      data() {
+        return {
+          foo: 1,
+          bar: 2
+        }
+      }
+      method: {
+        useFoo() {
+          return this.foo
+        },
+        useBar() {
+          return this.bar
+        }
+      }
+      mounted() {
+        console.log(this.useFoo()) // 1
+        console.log(this.useBar()) // 2
+      }
+    }
+    // 在组件中使用
+    import {myMixin} from './mixin'
+    export default {
+      mixins: [myMixin]
+    }
+  ```
+## vue3中的响应式系统如何处理循环引用的
+  - 使用任务栈+清除任务+闭包+判断当前执行函数
+  ```javascript
+    let activeEffect
+    const effectStack = []
+    function effect(fn, options={}) {
+      const effectFn = () => {
+        cleanup(effectFn)
+        activeEffect = effectFn
+        effectStack.push(effectFn)
+        const res = fn()
+        effectStack.pop()
+        return res
+      }
+      effectFn.options = options
+      effectFn.deps = []
+      if(!options.lazy) {
+        effectFn()
+      }
+      return effectFn
+    }
+    function cleanup(effectFn) {
+      for(let i = 0; i < effectStack.length; i++) {
+        const deps = effectStack.deps[i]
+        if(deps) {
+          deps.delete(effectFn)
+        }
+      }
+      effectStack.deps.length = 0
+    }
+  ```
+
+## vue3中的ref指令有那些用途
+  - 1、ref指令可以用来定义响应式数据
+  - 2、ref指令可以用来定义组件实例
+  - 3、ref指令可以用来定义组件实例的属性
+  - 4、获取DOM元素
+## vue3如何与web Components集成
+  - 在vue中直接使用web Components
+    ```vue
+      <template>
+        <my-web-component></my-web-component>
+      </template>
+    ```
+    ```javascript
+      import {defineCustomElemt} from 'vue'
+      const MyVueComponent = {
+        template: '<div>Hello, World</div>',
+        props: ['message']
+      }
+      const MyWebComponent = defineCustomElement(MyVueComponent)
+      customElements.define('my-web-component', MyWebComponent)
+    ```
+
+## vue3动态绑定属性v-bind（：）
+  ```vue
+    <template>
+      <div :class="dynamicClass" :style="dynamicStyle">
+        <img :src="imageUrl" :alt="imageAlt">
+      </div>
+    </template>
+
+    <script setup>
+    import { ref } from 'vue'
+
+    const dynamicClass = ref('active')
+    const dynamicStyle = ref({ color: 'red', fontSize: '16px' })
+    const imageUrl = ref('path/to/image.jpg')
+    const imageAlt = ref('Dynamic Image')
+    </script>
+  ```
+## ref,toRef,toRefs
+  - 用法如下
+  ```vue
+    import { ref, toRef, toRefs } from 'vue'
+    const state = reactive({
+      foo: 1,
+      bar: 2
+    })
+    const fooRef = toRef(state, 'foo')
+    const { foo, bar } = toRefs(state)
+    
+  ```
+## vue3中的事件函数是什么
+  - vue3中的事件函数是指用于处理各种事件的方法，这些事件可以是用户交互事件、生命周期事件、自定义事件等
+  - 模板中的事件函数可以使用@符号来绑定，例如：
+  ```vue
+    <button @click="handleClick">Click Me</button>
+    <input @input="handleInput"/>
+  ```
+  - 在setup中可以使用onMounted、onUpdated、onUnmounted等生命周期函数来处理事件，例如：
+  ```vue
+    <script setup>
+    import { onMounted } from 'vue'
+    const handleClick = () => {
+      console.log('clicked')
+    }
+    onMounted(() => {
+      document.addEventListener('click', handleClick)
+    })
+    </script>
+  ```
+  - 使用内联事件处理函数来处理事件，例如：
+  ```vue
+    <button @click="() => { console.log('clicked') }">Click Me</button>
+  ```
+  - 使用自事件修饰符
+  ```vue
+    <button @click.stop="handleClick">Click Me</button>
+    <input @input.prevent="handleInput"/>
+  ```
+  - 使用自定义事件
+  ```vue
+    <template>
+      <button @click="emitCustomEvent">Emit Event</button>
+    </template>
+    <script setup>
+    const emit = defineEmits(['custom-event'])
+
+    const emitCustomEvent = () => {
+      emit('custom-event', 'Some data')
+    }
+    </script>
+    <!--父组件-->
+    <template>
+      <MyComponent @custom-event="handleCustomEvent" />
+    </template>
+    <script setup>
+    import MyComponent from './MyComponent.vue'
+
+    const handleCustomEvent = (data) => {
+      console.log(data) // Some data
+    }
+    </script>
+  ```
+  - 使用监听器watch
+  ```vue
+    <script setup>
+    import { ref, watch } from 'vue'
+
+    const count = ref(0)
+
+    watch(count, (newValue, oldValue) => {
+      console.log(`count changed from ${oldValue} to ${newValue}`)
+    })
+    </script>
+  ```
+  - 使用addEventListener
+  ```vue
+    <script setup>
+    const handleClick = () => {
+      console.log('clicked')
+    }
+    onMounted(() => {
+      document.addEventListener('click', handleClick)
+    })
+    </script>
+  ```
+## 简述vue3中SetupContext函数详解-组件API的使用
+  - 在vue3中，setup函数接收一个SetupContext参数，该参数是一个对象，包含了组件的props、attrs、slots、emit、expose等API
+  - 例如：
+  ```vue
+    <script setup>
+    import { ref, computed, onMounted, onUnmounted } from 'vue'
+
+    const count = ref(0)
+    const doubleCount = computed(() => count.value * 2)
+    const props = defineProps({
+      message: String
+    })
+    const emit = defineEmits(['increment'])
+    defineExpose({
+      doubleCount
+    })
+
+    onMounted(() => {
+      console.log('mounted')
+    })
+
+    onUnmounted(() => {
+      console.log('unmounted')
+    })
+    </script>
+    <!--setup()函数中-->
+    <script>
+    export default {
+      setup(props, {attrs, slots, emit, expose}) {
+        console.log(props.message)
+        console.log(attrs)
+        console.log(slots.default)
+        const handleClick = () => {
+          emit('custom-click', 'Some data')
+        }
+        expose({
+          handleClick
+        })
+        return {
+          handleClick
+        }
+      }
+    </script>
+  ```
+## computed函数
+  ```vue
+    <script setup>
+    import { ref, computed } from 'vue'
+
+    const count = ref(0)
+    const doubleCount = computed(() => count.value * 2)
+
+    function increment() {
+      count.value++
+    }
+    const customComputed = computed({
+      // getter会调用
+      get: () => count.value * 2,
+      // setter会调用
+      set: (value) => {
+        // 赋值的时候会调用
+        count.value = value / 2
+      }
+    })
+    const customCount = () => {
+      // 触发setter
+      customComputed.value = 10
+    }
+    </script>
+  ```
+
+## vue3异步函数详解应用
+  - vue3中的异步函数应用主要涉及到几个方面：异步组件、异步数据获取、异步计算属性、异步生命周期钩子
+  - 异步组件
+    ```javascript
+      import { defineAsyncComponent } from 'vue'
+      const AsyncComponent = defineAsyncComponent(() => import('./AsyncComponent.vue'))
+    ```
+    ```vue
+      <template>
+        <Suspense>
+          <template #default>
+            <AsyncComponent />
+          </template>
+          <template #fallback>
+            <div>Loading...</div>
+          </template>
+        </Suspense>
+      </template>
+    ```
+  - 异步数据获取
+    ```javascript
+      import { ref, onMounted } from 'vue'
+      const data = ref(null)
+      onMounted(async () => {
+        data.value = await fetchData()
+      })
+    ```
+  - 异步计算属性
+    ```javascript
+      <script setup>
+      import { ref, watch } from 'vue'
+
+      const userId = ref(1)
+      const userData = ref(null)
+
+      watch(userId, async (newId) => {
+        userData.value = null // 重置数据，表示加载中
+        try {
+          const response = await fetch(`https://api.example.com/users/${newId}`)
+          userData.value = await response.json()
+        } catch (error) {
+          console.error('Failed to fetch user data:', error)
+          userData.value = null
+        }
+      }, { immediate: true })
+      </script>
+
+    ```
+## vue3中global函数详解：全局方法调用？
+  - 使用app.config.globalProperties
+    ```javascript
+      import { createApp } from 'vue'
+      const app = createApp({})
+      app.config.globalProperties.$myGlobalMethod = () => {
+        console.log('Global method called')
+      }
+      app.mount('#app')
+    ```
+    - 在组件中使用
+      ```vue
+        <script setup>
+        import { getCurrentInstance } from 'vue'
+        const { proxy } = getCurrentInstance()
+        proxy.$myGlobalMethod()
+        </script>
+      ```
+  - 使用provide/inject
+    ```javascript
+      import { createApp, provide, inject } from 'vue'
+      const app = createApp({})
+      app.provide('globalMethod', () => {
+        console.log('Global method called')
+      })
+      app.mount('#app')
+    ```
+    - 在组件中使用
+      ```vue
+        <script setup>
+        import { inject } from 'vue'
+        const globalMethod = inject('globalMethod')
+        globalMethod()
+        </script>
+      ```
+  - 使用插件
+    ```javascript
+      export default {
+        install: (app, options) => {
+          app.config.globalProperties.$myGlobalMethod = () => {
+            console.log('Global method called')
+          }
+        }
+      }
+      // 在main.js中使用
+      import { createApp } from 'vue'
+      import MyPlugin from './plugins/MyPlugin'
+      import App from './App.vue'
+
+      const app = createApp(App)
+      app.use(MyPlugin)
+      app.mount('#app')
+    ```
+    - 在组件中使用
+      ```vue
+        <script setup>
+        import { getCurrentInstance } from 'vue'
+        const { appContext } = getCurrentInstance()
+        appContext.config.globalProperties.$myGlobalMethod()
+        </script>
+      ```
+  - 使用hooks
+    ```javascript
+      export function useGlobalMethod() {
+        const myGlobalMethod = () => {
+          console.log('Global method called')
+        }
+        return {
+          myGlobalMethod
+        }
+      }
+    ```
+  - 使用es6模块
+    ```javascript
+      export function globalMethod() {
+        console.log('Global method called')
+      }
+    ```
+    ```vue
+      <script setup>
+      import { globalMethod } from './global'
+      globalMethod()
+      </script>
+    ```
