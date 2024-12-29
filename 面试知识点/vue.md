@@ -1602,3 +1602,871 @@
       globalMethod()
       </script>
     ```
+## vue3中自动导入ElementPlus组件
+  ```shell
+    pnpm add unplugin-vue-components unplugin-auto-import -D
+  ```
+  ```javascript
+    import { defineConfig } from 'vite'
+    import AutoImport from 'unplugin-auto-import/vite'
+    import Components from 'unplugin-vue-components/vite'
+    import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+    
+    export default defineConfig({
+      plugins: [
+        AutoImport({
+          resolvers: [ElementPlusResolver()],
+        }),
+        Components({
+          resolvers: [ElementPlusResolver()],
+        }),
+      ],
+    })
+  ```
+  ```javascript
+    // webpack.config.js
+    const AutoImport = require('unplugin-auto-import/webpack')
+    const Components = require('unplugin-vue-components/webpack')
+    const { ElementPlusResolver } = require('unplugin-vue-components/resolvers')
+    module.exports = {
+      plugins: [
+        AutoImport({
+          resolvers: [ElementPlusResolver()],
+        }),
+        Components({
+          resolvers: [ElementPlusResolver()],
+        }),
+      ],
+    }
+  ```
+## vue3自动导入ant-design-vue组件
+  ```javascript
+    import { defineConfig } from 'vite'
+    import vue from '@vitejs/plugin-vue'
+    import { resolve } from 'path'
+    import AutoImport from 'unplugin-auto-import/vite'
+    import Components from 'unplugin-vue-components/vite'
+    import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
+
+    // https://vite.dev/config/
+    export default defineConfig({
+      plugins: [
+        vue(),
+        AutoImport({ 
+          /* options */ 
+          include: [
+            /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
+            /\.vue$/,
+            /\.vue\?vue/, // .vue
+            /\.md$/, // .md
+          ],
+          imports: [
+            // presets
+            'vue',
+            'vue-router',
+            'pinia',
+          ],
+          dts: "src/auto-import.d.ts",
+        }),
+        Components({
+          resolvers: [
+            AntDesignVueResolver({
+              importStyle: false, // css in js
+            }),
+          ],
+        }),
+      ],
+      // 配置别名
+      resolve: {
+        alias: { //定义路径别名
+          '@': resolve(__dirname, './src')
+        }
+      },
+      // 打包配置
+      build: {
+        // 输出路径
+        outDir: 'dist',
+        // 打包后是否生成 source map 文件
+        sourcemap: false,
+        // 启用/禁用 CSS 代码拆分
+        cssCodeSplit: true,
+        // 依赖包提取到一个独立的文件
+        rollupOptions: {
+          // tree shaking
+          treeshake: true,
+          // 代码拆分
+          output: {
+            manualChunks(id) {
+              if (id.includes('node_modules')) {
+                return id.toString().split('node_modules/')[1].split('/')[0].toString();
+              }
+            }
+          }
+        }
+      },
+      // 服务配置
+      server: {
+        host: '0.0.0.0',
+        port: 9527,
+        proxy: {
+          '/api': {
+            // target: 'http://192.168.1.17:3000/',
+            target: 'http://localhost:3000/',
+            changeOrigin: true,
+            rewrite: (path) => path.replace(/^\/api/, '')
+          }
+        }
+      }
+    })
+
+  ```
+
+## vue3中使用jsx
+  ```shell
+    pnpm add @vitejs/plugin-vue @vitejs/plugin-vue-jsx -D
+  ```
+  ```javascript
+    import { defineConfig } from 'vite'
+    import vue from '@vitejs/plugin-vue'
+    import vueJsx from '@vitejs/plugin-vue-jsx'
+
+    export default defineConfig({
+      plugins: [
+        vue(),
+        vueJsx(),
+      ],
+    })
+  ```
+  ```jsx
+    import { defineComponent } from 'vue'
+
+    export default defineComponent({
+      name: 'MyComponent',
+      props: {
+        message: String
+      },
+      setup(props) {
+        return () => (
+          <div>
+            <h1>{props.message}</h1>
+          </div>
+        )
+      }
+    })
+
+  ```
+
+## vue3中的curried(柯里化)函数详解：更好的函数式编程方式？
+  ```javascript
+    function curry(fn) {
+      return function curried(...args){
+        if(args.length >= fn.length){
+          return fn.apply(this, args)
+        }else{
+          return function(...args2){
+            return curried.apply(this, args.concat(args2))
+          }
+        }
+      }
+    }
+  ```
+  ```vue
+    <script setup>
+    import { ref } from 'vue'
+
+    const curry = (fn) => {
+      return function curried(...args) {
+        if (args.length >= fn.length) {
+          return fn.apply(this, args);
+        } else {
+          return function(...args2) {
+            return curried.apply(this, args.concat(args2));
+          }
+        }
+      };
+    }
+
+    const add = (a, b, c) => a + b + c;
+    const curriedAdd = curry(add);
+
+    const result = ref(0);
+
+    const calculate = () => {
+      result.value = curriedAdd(1)(2)(3); // 6
+    }
+    </script>
+
+    <template>
+      <button @click="calculate">Calculate</button>
+      <p>Result: {{ result }}</p>
+    </template>
+
+  ```
+
+## vue3中的nextTick函数，如何处理DOM更新后的操作
+  ```vue
+    <script setup>
+    import { ref, nextTick } from 'vue'
+
+    const message = ref('Hello')
+
+    const updateMessage = async () => {
+      message.value = 'Updated'
+      // 等待DOM更新完成后再执行下面的代码
+      await nextTick()
+      // DOM更新完成后执行的代码
+      console.log('DOM updated')
+    }
+    </script>
+
+  ```
+## vue3中的proxy为什么一定要使用Reflect
+  - Reflect是一个内置的对象，它提供了一些静态方法来操作对象，这些方法与Object上的方法类似，但是它们是不可枚举的，并且它们的参数和返回值都是Reflect对象，而不是Object对象。
+  - Reflect可以正确处理this的绑定，而Object.defineProperty()不能正确处理this的绑定。
+    ```javascript
+      const obj = {
+        bar: 1,
+        get foo() {
+          return this.bar;
+        }
+      } 
+      const proxy = new Proxy(obj, {
+        get(target,key, receiver) {
+          return Reflect.get(target, key, receiver);
+        }
+      })
+    ```
+  - Reflect方法与对应的Object方法的参数和返回值相同，因此可以轻松地将Object方法替换为Reflect方法。
+    ```javascript
+      Object.defineProperty(obj, 'prop', { value: 1 });
+      Reflect.defineProperty(obj, 'prop', { value: 1 });
+    ```
+  - Reflect方法可以正确处理继承和原型链
+    ```javascript
+      const obj = {
+        foo: 1,
+        bar: 2
+      }
+      const proxy = new Proxy(obj, {
+        set(target, key, value, receiver) {
+          return Reflect.get(target, key, value, receiver);
+        }
+      })
+    ```
+  - Reflect方法可以正确处理Symbol属性
+    ```javascript
+      const obj = {
+        [Symbol('foo')]: 1
+      }
+      const proxy = new Proxy(obj, {
+        get(target, key, receiver) {
+          return Reflect.get(target, key, receiver);
+        }
+      })
+    ```
+
+## vue3中如何使用Supabase Auth方法？
+  - 安装
+    ```shell
+      pnpm add @supabase/supabase-js
+    ```
+  - 初始化Supabase 客户端
+    ```javascript
+      // src/supabase.js
+      import { createClient } from '@supabase/supabase-js'
+
+      const supabaseUrl = 'YOUR_SUPABASE_PROJECT_URL'
+      const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY'
+
+      export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    ```
+  - 使用hooks
+    ```javascript
+      // src/composables/useAuth.js
+      import { ref } from 'vue'
+      import { supabase } from '../supabase'
+
+      export function useAuth() {
+        const user = ref(null)
+
+        // 检查当前会话
+        const checkSession = async () => {
+          const { data: { user: currentUser } } = await supabase.auth.getUser()
+          user.value = currentUser
+        }
+
+        // 注册
+        const signUp = async (email, password) => {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+          })
+          if (error) throw error
+          return data
+        }
+
+        // 登录
+        const signIn = async (email, password) => {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+          if (error) throw error
+          user.value = data.user
+          return data
+        }
+
+        // 登出
+        const signOut = async () => {
+          const { error } = await supabase.auth.signOut()
+          if (error) throw error
+          user.value = null
+        }
+
+        // 使用第三方提供商登录
+        const signInWithProvider = async (provider) => {
+          const { data, error } = await supabase.auth.signInWithOAuth({
+            provider,
+          })
+          if (error) throw error
+          return data
+        }
+
+        return {
+          user,
+          checkSession,
+          signUp,
+          signIn,
+          signOut,
+          signInWithProvider,
+        }
+      }
+
+    ```
+  - 使用
+    ```vue
+      <template>
+        <div>
+          <div v-if="user">
+            Welcome, {{ user.email }}!
+            <button @click="handleSignOut">Sign Out</button>
+          </div>
+          <div v-else>
+            <input v-model="email" placeholder="Email" />
+            <input v-model="password" type="password" placeholder="Password" />
+            <button @click="handleSignIn">Sign In</button>
+            <button @click="handleSignUp">Sign Up</button>
+            <button @click="handleSignInWithGoogle">Sign In with Google</button>
+          </div>
+        </div>
+      </template>
+
+      <script setup>
+      import { ref, onMounted } from 'vue'
+      import { useAuth } from './composables/useAuth'
+
+      const { user, checkSession, signIn, signUp, signOut, signInWithProvider } = useAuth()
+
+      const email = ref('')
+      const password = ref('')
+
+      onMounted(async () => {
+        await checkSession()
+      })
+
+      const handleSignIn = async () => {
+        try {
+          await signIn(email.value, password.value)
+          console.log('Signed in successfully')
+        } catch (error) {
+          console.error('Error signing in:', error.message)
+        }
+      }
+
+      const handleSignUp = async () => {
+        try {
+          await signUp(email.value, password.value)
+          console.log('Signed up successfully')
+        } catch (error) {
+          console.error('Error signing up:', error.message)
+        }
+      }
+
+      const handleSignOut = async () => {
+        try {
+          await signOut()
+          console.log('Signed out successfully')
+        } catch (error) {
+          console.error('Error signing out:', error.message)
+        }
+      }
+
+      const handleSignInWithGoogle = async () => {
+        try {
+          await signInWithProvider('google')
+          console.log('Signed in with Google successfully')
+        } catch (error) {
+          console.error('Error signing in with Google:', error.message)
+        }
+      }
+      </script>
+    ```
+  - 路由保护
+    ```javascript
+      // src/router.js
+      import { createRouter, createWebHistory } from 'vue-router'
+      import { supabase } from './supabase'
+
+      const routes = [
+        // ... 你的路由配置
+      ]
+
+      const router = createRouter({
+        history: createWebHistory(),
+        routes,
+      })
+
+      router.beforeEach(async (to, from, next) => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (to.meta.requiresAuth && !user) {
+          next('/login')
+        } else {
+          next()
+        }
+      })
+
+      export default router
+    ```
+  
+## vue3中的全局函数主要是指可以在应用的任何地方使用的函数和方法
+  - createApp
+    ```javascript
+      import { createApp } from 'vue'
+      import App from './App.vue'
+
+      const app = createApp(App)
+      app.mount('#app')
+
+    ```
+  - app.component
+    ```javascript
+      import { createApp } from 'vue'
+      import App from './App.vue'
+      import MyComponent from './components/MyComponent.vue'
+
+      const app = createApp(App)
+      app.component('MyComponent', MyComponent)
+      app.mount('#app')
+
+    ```
+  - app.directive
+    ```javascript
+      app.directive('focus', {
+        mounted(el) {
+          el.focus()
+        }
+      })
+    ```
+  - aap.use
+    ```javascript
+      import { createApp } from 'vue'
+      import App from './App.vue'
+      import router from './router'
+
+      const app = createApp(App)
+      app.use(router)
+      app.mount('#app')
+
+    ```
+  - app.mixin
+    ```javascript
+      import { createApp } from 'vue'
+      import App from './App.vue'
+      import mixin from './mixin'
+
+      const app = createApp(App)
+      app.mixin(mixin)
+      app.mount('#app')
+
+    ```
+  - app.provide
+    ```javascript
+      // 在根组件
+      app.provide('key', 'value')
+
+      // 在任何子组件
+      import { inject } from 'vue'
+      const value = inject('key')
+
+    ```
+
+## 使用vue3+ts+axios+pinias实现无感刷新
+  - 1.安装
+    ```shell
+      pnpm add axios pinia
+    ```
+  - 2.创建axios实例
+    ```javascript
+      // src/utils/axios.ts
+      import axios, { AxiosInstance } from 'axios';
+
+      const axiosInstance: AxiosInstance = axios.create({
+        baseURL: 'https://api.example.com',
+        timeout: 5000,
+      });
+
+      export default axiosInstance;
+    ```
+  - 3.创建store
+    ```javascript
+      // src/stores/auth.ts
+      import { defineStore } from 'pinia';
+      import axiosInstance from '@/utils/axios';
+
+      interface AuthState {
+        accessToken: string | null;
+        refreshToken: string | null;
+      }
+
+      export const useAuthStore = defineStore('auth', {
+        state: (): AuthState => ({
+          accessToken: localStorage.getItem('accessToken'),
+          refreshToken: localStorage.getItem('refreshToken'),
+        }),
+        actions: {
+          setTokens(accessToken: string, refreshToken: string) {
+            this.accessToken = accessToken;
+            this.refreshToken = refreshToken;
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
+          },
+          clearTokens() {
+            this.accessToken = null;
+            this.refreshToken = null;
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+          },
+          async refreshTokens() {
+            try {
+              const response = await axiosInstance.post('/refresh', {
+                refreshToken: this.refreshToken,
+              });
+              const { accessToken, refreshToken } = response.data;
+              this.setTokens(accessToken, refreshToken);
+              return accessToken;
+            } catch (error) {
+              this.clearTokens();
+              throw error;
+            }
+          },
+        },
+      });
+
+    ```
+  - 创建响应拦截器
+    ```javascript
+      // src/utils/axios.ts
+      import axios, { AxiosInstance, AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+      import { useAuthStore } from '@/stores/auth';
+
+      const axiosInstance: AxiosInstance = axios.create({
+        baseURL: 'https://api.example.com',
+        timeout: 5000,
+      });
+
+      axiosInstance.interceptors.request.use(
+        (config: AxiosRequestConfig) => {
+          const authStore = useAuthStore();
+          if (authStore.accessToken) {
+            config.headers = config.headers || {};
+            config.headers['Authorization'] = `Bearer ${authStore.accessToken}`;
+          }
+          return config;
+        },
+        (error: AxiosError) => {
+          return Promise.reject(error);
+        }
+      );
+
+      axiosInstance.interceptors.response.use(
+        (response: AxiosResponse) => {
+          return response;
+        },
+        async (error: AxiosError) => {
+          const originalRequest = error.config;
+          if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            const authStore = useAuthStore();
+            try {
+              const newAccessToken = await authStore.refreshTokens();
+              originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+              return axiosInstance(originalRequest);
+            } catch (refreshError) {
+              // 刷新令牌失败，可能需要重新登录
+              authStore.clearTokens();
+              // 重定向到登录页面或显示登录弹窗
+              return Promise.reject(refreshError);
+            }
+          }
+          return Promise.reject(error);
+        }
+      );
+
+      export default axiosInstance;
+    ```
+  - 使用
+    ```javascript
+      <script setup lang="ts">
+      import { ref, onMounted } from 'vue';
+      import axiosInstance from '@/utils/axios';
+      import { useAuthStore } from '@/stores/auth';
+
+      const authStore = useAuthStore();
+      const data = ref(null);
+
+      const fetchData = async () => {
+        try {
+          const response = await axiosInstance.get('/protected-route');
+          data.value = response.data;
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      };
+
+      onMounted(() => {
+        fetchData();
+      });
+      </script>
+
+      <template>
+        <div>
+          <h1>Protected Data</h1>
+          <pre>{{ data }}</pre>
+        </div>
+      </template>
+    ```
+
+## vue3页面加载完之后获取宽度和高度
+  ```vue
+    <template>
+      <div ref="containerRef">
+        <h1>页面内容</h1>
+        <p>宽度: {{ width }}px</p>
+        <p>高度: {{ height }}px</p>
+      </div>
+    </template>
+
+    <script setup lang="ts">
+    import { ref, onMounted, nextTick } from 'vue';
+
+    // 创建一个 ref 来引用 DOM 元素
+    const containerRef = ref<HTMLElement | null>(null);
+
+    // 创建 refs 来存储宽度和高度
+    const width = ref(0);
+    const height = ref(0);
+
+    // 定义一个函数来更新尺寸
+    const updateSize = () => {
+      if (containerRef.value) {
+        width.value = containerRef.value.offsetWidth;
+        height.value = containerRef.value.offsetHeight;
+      }
+    };
+
+    // 使用 onMounted 钩子
+    onMounted(() => {
+      // 使用 nextTick 确保 DOM 已经完全更新
+      nextTick(() => {
+        updateSize();
+
+        // 添加窗口 resize 事件监听器，以便在窗口大小变化时更新尺寸
+        window.addEventListener('resize', updateSize);
+      });
+    });
+
+    // 可选：在组件卸载时移除事件监听器
+    onUnmounted(() => {
+      window.removeEventListener('resize', updateSize);
+    });
+    </script>
+
+  ```
+
+## 封装粘性组件
+  ```vue
+    <template>
+      <div ref="stickyContainer" :style="containerStyle">
+        <div ref="stickyElement" :style="elementStyle">
+          <slot></slot>
+        </div>
+      </div>
+    </template>
+
+    <script>
+    import { ref, onMounted, onUnmounted, computed } from 'vue'
+
+    export default {
+      name: 'StickyComponent',
+      props: {
+        offsetTop: {
+          type: Number,
+          default: 0
+        },
+        zIndex: {
+          type: Number,
+          default: 1000
+        }
+      },
+      setup(props) {
+        const stickyContainer = ref(null)
+        const stickyElement = ref(null)
+        const isSticky = ref(false)
+        const originalTop = ref(0)
+
+        const containerStyle = computed(() => ({
+          position: 'relative'
+        }))
+
+        const elementStyle = computed(() => ({
+          position: isSticky.value ? 'fixed' : 'relative',
+          top: isSticky.value ? `${props.offsetTop}px` : 'auto',
+          zIndex: isSticky.value ? props.zIndex : 'auto',
+          width: isSticky.value ? `${stickyContainer.value.offsetWidth}px` : 'auto'
+        }))
+
+        const checkPosition = () => {
+          if (!stickyContainer.value || !stickyElement.value) return
+
+          const containerRect = stickyContainer.value.getBoundingClientRect()
+          const elementRect = stickyElement.value.getBoundingClientRect()
+
+          if (containerRect.top <= props.offsetTop) {
+            if (!isSticky.value) {
+              isSticky.value = true
+              originalTop.value = containerRect.top + window.pageYOffset
+            }
+          } else {
+            isSticky.value = false
+          }
+
+          if (isSticky.value) {
+            const bottomOfContainer = originalTop.value + containerRect.height
+            const bottomOfSticky = window.pageYOffset + elementRect.height + props.offsetTop
+            if (bottomOfSticky >= bottomOfContainer) {
+              stickyElement.value.style.top = `${bottomOfContainer - bottomOfSticky + props.offsetTop}px`
+            } else {
+              stickyElement.value.style.top = `${props.offsetTop}px`
+            }
+          }
+        }
+
+        onMounted(() => {
+          window.addEventListener('scroll', checkPosition)
+          window.addEventListener('resize', checkPosition)
+          checkPosition()
+        })
+
+        onUnmounted(() => {
+          window.removeEventListener('scroll', checkPosition)
+          window.removeEventListener('resize', checkPosition)
+        })
+
+        return {
+          stickyContainer,
+          stickyElement,
+          containerStyle,
+          elementStyle
+        }
+      }
+    }
+    </script>
+  ```
+  ```javascript
+    import StickyComponent from './StickyComponent.vue'
+
+    export default {
+      install: (app, options) => {
+        // 全局注册 StickyComponent
+        app.component('StickyComponent', StickyComponent)
+
+        // 添加一个全局指令 v-sticky
+        app.directive('sticky', {
+          mounted(el, binding) {
+            const offsetTop = binding.value || 0
+            const stickyContainer = document.createElement('div')
+            const stickyElement = document.createElement('div')
+            
+            el.parentNode.insertBefore(stickyContainer, el)
+            stickyContainer.appendChild(stickyElement)
+            stickyElement.appendChild(el)
+
+            let isSticky = false
+            let originalTop = 0
+
+            const checkPosition = () => {
+              const containerRect = stickyContainer.getBoundingClientRect()
+              const elementRect = stickyElement.getBoundingClientRect()
+
+              if (containerRect.top <= offsetTop) {
+                if (!isSticky) {
+                  isSticky = true
+                  originalTop = containerRect.top + window.pageYOffset
+                  Object.assign(stickyElement.style, {
+                    position: 'fixed',
+                    top: `${offsetTop}px`,
+                    width: `${containerRect.width}px`,
+                    zIndex: '1000'
+                  })
+                }
+              } else {
+                isSticky = false
+                Object.assign(stickyElement.style, {
+                  position: 'relative',
+                  top: 'auto',
+                  width: 'auto',
+                  zIndex: 'auto'
+                })
+              }
+
+              if (isSticky) {
+                const bottomOfContainer = originalTop + containerRect.height
+                const bottomOfSticky = window.pageYOffset + elementRect.height + offsetTop
+                if (bottomOfSticky >= bottomOfContainer) {
+                  stickyElement.style.top = `${bottomOfContainer - bottomOfSticky + offsetTop}px`
+                } else {
+                  stickyElement.style.top = `${offsetTop}px`
+                }
+              }
+            }
+
+            window.addEventListener('scroll', checkPosition)
+            window.addEventListener('resize', checkPosition)
+            checkPosition()
+
+            // 清理函数
+            el._stickyCleanup = () => {
+              window.removeEventListener('scroll', checkPosition)
+              window.removeEventListener('resize', checkPosition)
+            }
+          },
+          unmounted(el) {
+            if (el._stickyCleanup) {
+              el._stickyCleanup()
+            }
+          }
+        })
+      }
+    }
+
+  ```
+  ```javascript
+    import { createApp } from 'vue'
+    import App from './App.vue'
+    import StickyPlugin from './sticky-plugin'
+
+    const app = createApp(App)
+    app.use(StickyPlugin)
+    app.mount('#app')
+
+  ```
