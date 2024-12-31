@@ -39,7 +39,11 @@
     - Hooks（函数组件）
       - useState: 用于在函数组件中添加状态
       - useEffect: 用于处理副作用
-      - useContext, useReducer, useCallback, useMemo
+      - useContext: 用于共享状态
+      - useReducer: 用于管理复杂状态
+      - useCallback: 用于缓存函数
+      - useMemo: 用于缓存计算结果
+      - useImperativeHandle: 子组件向父组件暴露数据
 
 ## useEffect的执行顺序
   - 1.组件渲染

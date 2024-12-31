@@ -290,6 +290,26 @@
       text-overflow: ellipsis;
     }
   ```
+## 多行文本超出省略
+  ```css
+    .ellipsis {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  ```
+ 多列文本超出省略
+  ```css
+    .multiline-ellipsis {
+      display: -webkit-box;
+      -webkit-line-clamp: 3; /* 显示的行数 */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  ```
 ## 滚动视差
   - background-attachment：作用是设置背景图像是否固定或者随着页面的其余部分滚动
     - scroll：默认值，背景图像会随着页面其余部分的滚动而移动
