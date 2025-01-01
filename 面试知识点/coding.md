@@ -90,3 +90,48 @@
     "promise3"
     "setTimeout"
   ```
+
+## living coding
+  ```javascript
+    // 自定义错误类，用于处理"数据不足"的情况
+    class CustomError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = "CustomError";
+      }
+    }
+
+    // 主函数：返回一个Promise，用于生成用户的品牌列表
+    function solution(U, N) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          // 并行调用两个函数，获取用户的喜欢品牌和性别相关品牌
+          const [likedBrands, genderBrands] = await Promise.all([
+            getLikedBrands(U.id), // 根据用户ID获取用户喜欢的品牌
+            getTopBrandsForGender(U.gender), // 根据用户性别获取热门品牌
+          ]);
+
+          // 提取品牌名称，并保持顺序
+          const likedBrandNames = likedBrands.map((brand) => brand.name); // 用户喜欢的品牌名称
+          const genderBrandNames = genderBrands.map((brand) => brand.name); // 性别相关品牌名称
+
+          // 合并两个品牌列表，去重并保持顺序
+          const combinedBrands = [
+            ...likedBrandNames,
+            ...genderBrandNames.filter((brand) => !likedBrandNames.includes(brand)), // 确保去重
+          ];
+
+          // 检查是否有足够的品牌
+          if (combinedBrands.length >= N) {
+            resolve(combinedBrands.slice(0, N)); // 返回前N个品牌
+          } else {
+            reject(new CustomError("Not enough data")); // 数据不足，抛出错误
+          }
+        } catch (error) {
+          // 如果任何一个Promise被拒绝，直接抛出自定义错误
+          reject(new CustomError("Not enough data"));
+        }
+      });
+    }
+
+  ```
