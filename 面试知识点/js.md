@@ -132,6 +132,15 @@
     ```
   - 2、Object.is(value1, value2)
     - 判断两个值是否严格相等，与===类似，不同之处在于+0不等于-0，NaN等于自身
+    ```javascript
+      Object.is() // true
+      -0 === +0 // true
+      NaN === NaN // false
+      Object.is(NaN, NaN) //true
+      Object.is(-0, +0) // false
+      Object.is({}, {}) // false
+      Object.is([], []) // false
+    ```
   - 3、Object.setPrototypeOf(obj, proto)
     - 设置一个指定的对象的原型（即，内部[[Prototype]]属性）到另一个对象或 null。
   - 4、Object.getOwnPropertySymbols(obj)
