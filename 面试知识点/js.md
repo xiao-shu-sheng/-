@@ -377,7 +377,7 @@
   - 9、只要函数参数使用了默认值、解构赋值、或者扩展运算符，那么函数内部就不能显式设定为严格模式，否则会报错
 
 
-ES6新增的Set、Map如何理解
+## ES6新增的Set、Map如何理解
   - Set
     - 类似于数组，但是成员的值都是唯一的，包括原始值或者对象引用
     - 当 Set 中的引用类型对象不再被引用且符合垃圾回收条件时，垃圾回收机制会自动清除该对象，Set 中也会失去对应的元素
@@ -755,6 +755,29 @@ ES6新增的Set、Map如何理解
   - 装饰器的应用场景
     - 日志记录
     - 性能监控
+  - 原理：使用函数封装和元编程实现。元编程是一种编程技术，它允许程序在运行时创建、修改或分析其他程序(或自身)的结构和行为
+    - 反射
+    ```javascript
+      // 检查对象的属性
+      const obj = { a: 1, b: 2 };
+      console.log(Object.keys(obj)); // ['a', 'b']
+
+      // 检查对象的原型
+      console.log(Object.getPrototypeOf(obj));
+
+      // 检查函数的参数
+      function foo(a, b, c) {}
+      console.log(foo.length); // 3
+
+    ```
+    - 动态求值
+    ```javascript
+      eval('console.log("Hello, world!")');
+
+      const sum = new Function('a', 'b', 'return a + b');
+      console.log(sum(2, 3)); // 5
+
+    ```
   
 ## js中的数据类型？存储上的差别
   - 类型
@@ -1272,6 +1295,16 @@ ES6新增的Set、Map如何理解
   ```
   - 实现new操作符
   ```javascript
+    // 定义 Person 构造函数
+    function Person(name) {
+      this.name = name;
+    }
+
+    // 在 Person 的原型上添加 sayName 方法
+    Person.prototype.sayName = function() {
+      console.log(this.name);
+    };
+    // 自定义的 new 操作符实现
     function myNew(fn, ...args) {
       // 创建一个空对象，并将该对象的原型指向构造函数的prototype属性
       let obj = Object.create(fn.prototype);
