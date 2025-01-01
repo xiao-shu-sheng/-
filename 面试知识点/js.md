@@ -805,6 +805,7 @@ ES6新增的Set、Map如何理解
       - JSON.parse(JSON.stringify(obj))
       - 递归复制
       - 使用lodash库的_.cloneDeep()方法
+      - 使用浏览器提供的structuredClone()方法
   - 区别
     - 复制深度
       - 浅拷贝只复制一层
@@ -2253,7 +2254,7 @@ ES6新增的Set、Map如何理解
 
 ## import和require的区别
   - 意义
-    - import: import 是 ES6 模块语法，用于导入其他模块的成员
+    - import: import 是 ES6 Module 模块语法，用于导入其他模块的成员
     - require: require 是 CommonJS 模块语法，用于导入其他模块的成员
   - 加载时机
     - import: 静态加载，在编译时执行
@@ -2288,4 +2289,174 @@ ES6新增的Set、Map如何理解
     - 使用微前端框架：使用微前端框架，如 qiankun、single-spa、无界，可以轻松实现微前端架构
 
 
+## async/await的设计和实现
+  - 设计理念
+    - async/await的主要设计目标是简化Promise的使用，使异步的代码更加易读易写。核心思想是允许在异步函数中使用看似同步的代码结构，自动处理Promise的解析和错误捕捉，保持非阻塞的异步执行模型
+  - 语法设计
+    - async关键字用于声明一个异步函数
+    - await关键字用于等待一个Promise结果
+    - 异步函数总是返回一个Promise
+  - 实现原理
+    - async/await的实现基于生成器(generators)和Promise
+    - 将异步函数转换为生成器函数
+    - 创建一个执行器来运行生成器
+    - 使用Promise来控制异步操作流程，简化逻辑如下：
+    ```javascript
+      function asyncToGenerator(generatorFunc) {
+        return function() {
+          const gen = generatorFunc.apply(this, arguments);
+          return new Promise((resolve, reject) => {
+            function step(key, arg) {
+              let generatorResult;
+              try {
+                generatorResult = gen[key](arg);
+              } catch (error) {
+                return reject(error);
+              }
+              const { value, done } = generatorResult;
+              if (done) {
+                return resolve(value);
+              } else {
+                return Promise.resolve(value).then(
+                  val => step("next", val),
+                  err => step("throw", err)
+                );
+              }
+            }
+            step("next");
+          });
+        }
+      }
 
+    ```
+
+## 判断数组的方法，手动实现instanceof
+  - 判断数组的方法
+    - Array.isArray()
+    ```javascript
+      Array.isArray([1, 2, 3]); // true
+    ```
+  - 使用instanceof
+    ```javascript
+      [1,2,3] instanceof Array; //true
+    ```
+  - 使用Object.prototype.toString.call()
+    ```javascript
+      Object.prototype.toString.call([1,2,3]) // "[Object Array]"
+    ```
+  - Array.prototype.isPrototypeOf()
+    ```javascript
+      Array.prototype.isPrototype([1,2,2]) //true
+    ```
+  - 构造函数的name属性(前提是构造函数的name属性没有被修改)
+    ```javascript
+      [1,2,3].constructor.name == 'name'
+    ```
+  - 手动实现instanceof
+    ```javascript
+      function myInstanceof(obj, constructor) {
+        if (obj === null || typeof obj !== 'object') {
+          return false
+        }
+        // 获取原型对象
+        let proto = Object.getPrototypeOf(obj)
+        // 遍历原型链
+        while(proto !== null) {
+          if (proto === constructor.prototype) {
+            return true
+          }
+          proto = Object.getPrototypeOf(proto)
+        }
+        return false
+      }
+      console.log(myInstanceof([], Array))
+      console.log(myInstanceof({}, Object))
+      console.log(myInstanceof({}, Array))
+    ```
+
+## 如何让中间页携带cookie
+  - 设置正确的cors：在服务器端需要正确配置cors策略以允许跨域请求携带cookie
+  ```javascript
+    // 如果使用express
+    app.use(cors({
+      origin: "https://your-origin.com" // 指定允许的源
+      credentials: true // 允许携带凭证(包含cookie)
+    }))
+  ```
+  - 在客户端需要设置withCredentials
+  ```javascript
+    // 使用XMLHttpRequest
+    var xhr = new XMLHttpRequest()
+    xhr.withCredentials = true
+    // 使用 Fetch API
+    fetch('https://api.example.com/data', {
+      credentials: 'include'
+    });
+    // 使用 Axios
+    axios.get('https://api.example.com/data', {
+      withCredentials: true
+    });
+  ```
+  - 设置正确的cookie属性
+  ```javascript
+    // 在服务器端设置 cookie
+    res.cookie('sessionId', 'abc123', {
+      domain: '.example.com', // 允许子域名访问
+      path: '/',
+      secure: true, // 只在 HTTPS 连接中发送
+      httpOnly: true, // 防止客户端 JavaScript 访问
+      sameSite: 'None' // 允许跨站点请求
+    });
+  ```
+  - 使用postMessage
+  ```javascript
+    // 在中间页
+    window.parent.postMessage({ type: 'AUTH_TOKEN', token: 'abc123' }, 'https://parent-domain.com')
+    // 在父页面
+    window.addEventListener('message', (event) => {
+      if (event.origin !== 'https://middlepage.com') return;
+      if (event.data.type === 'AUTH_TOKEN') {
+        // 处理接收到的 token
+      }
+    });
+  ```
+## 跨域
+  - 跨域是指浏览器允许向不同的源(域名、端口、协议)的服务器发送请求。
+  - 同源策略是浏览器一个重要的安全机制，它限制了从一个源加载的文档或脚本如何与来自另一个源的资源进行交互
+  - 跨域请求的类型
+    - 简单请求： 满足特定条件的get、post或HEAD
+  - 常见的跨域解决方案
+    - 服务器端设置 Access-Control-Allow-Origin 等响应头
+    ```javascript
+      // Node.js with Express
+      app.use((req, res, next) => {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        next();
+      });
+
+    ```
+  - JSONP（JSON with Padding） 利用 <script> 标签不受同源策略限制的特点。
+  ```javascript
+    function jsonpCallback(data) {
+      console.log(data);
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://api.example.com/data?callback=jsonpCallback';
+    document.body.appendChild(script);
+
+  ```
+  - 代理服务器 在同源的服务器上创建一个代理，由它来请求跨域资源
+  - postMessage 用于不同窗口间的通信
+  ```javascript
+    // 发送消息
+    window.postMessage('Hello', 'http://example.com');
+
+    // 接收消息
+    window.addEventListener('message', (event) => {
+      if (event.origin !== 'http://example.com') return;
+      console.log(event.data);
+    });
+
+  ```
