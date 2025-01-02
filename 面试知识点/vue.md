@@ -1144,7 +1144,7 @@
   - 使用自定义订阅发布模式来管理全局状态
 ## vue3中的Fragment是什么
   - vue3的新特性，包含多个根节点的模板被表示为一个片段(Fragment)，可以避免在模板中使用额外的根节点
-## vue3如何支持Fragments
+  - vue3如何支持Fragments
   ```vue
     <template>
       <div>1</div>
