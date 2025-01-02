@@ -7,6 +7,46 @@
     - 虚拟DOM
     - 双向数据流
 
+## vue2和vue3的区别
+  - 1、性能提升
+    - 更小的包体积
+      - vue3的核心库体积只有10kb左右，而vue2的核心库体积为30kb左右，tree-shaking可以减少体积
+    - 重写了虚拟DOM的实现
+    - 编译优化
+      - vue3的编译器使用了基于AST的编译器，编译速度更快
+      - vue2的编译器使用了基于字符串的编译器，编译速度更慢
+    - 响应系统
+      - 使用proxy和reflect实现响应系统，替代了Object.defineProperty
+      - 可以监听数组变化和对象的删除/添加
+  - 2、支持多根节点
+  - 3、引入了Teleport组件
+    - 允许将组件渲染到指定的DOM节点中
+  - 4、声明周期变化
+  - 5、vue3的异步组件需要使用defineAsyncComponent来定义
+  - 6、typescript支持
+  - 7、更好的tree-shaking支持
+  - 8、Suspense组件
+    - 用于协调异步组件的加载
+    ```vue
+      <Suspense>
+        <template #default>
+          <AsyncComponent />
+        </template>
+        <template #fallback>
+          Loading...
+        </template>
+      </Suspense>
+    ```
+## vue2如何实现对数组和对象的响应式
+  - vue2中，对数组和对象的响应式是通过Object.defineProperty()方法实现的，对对象进行响应式处理时，会遍历对象的所有属性，对每个属性都调用Object.defineProperty()方法，对数组进行响应式处理时，会遍历数组的所有元素，对每个元素都调用Object.defineProperty()方法，这样就实现了对数组和对象的响应式处理。对数组是通过重写数组方法来实现的数组的响应式的。
+  - vue3是使用proxy来实现对象和数组的响应式
+  - vue2中对新增对象属性的处理：this.$set(this.obj, 'newKey', 'newValue'), Object.assign(),computed，forceUpdate()
+
+## vue2和vue3的diff算法：
+  - vue2的diff算法是基于双指针的算法，时间复杂度为O(n)
+  - vue3的diff算法是基于最长递增子序列的算法，时间复杂度为O(nlogn)
+  - vue3的diff算法优化了静态节点的处理，减少了不必要的比较，减少了DOM操作次数，提高了性能
+  
 ## 单页面应用与多页面应用：
 
   | 特性           | 单页面应用(SPA)          |多页面应用(MPA) |
@@ -631,36 +671,7 @@
     }
   ```
 
-## vue2和vue3的区别
-  - 1、性能提升
-    - 更小的包体积
-      - vue3的核心库体积只有10kb左右，而vue2的核心库体积为30kb左右，tree-shaking可以减少体积
-    - 重写了虚拟DOM的实现
-    - 编译优化
-      - vue3的编译器使用了基于AST的编译器，编译速度更快
-      - vue2的编译器使用了基于字符串的编译器，编译速度更慢
-    - 响应系统
-      - 使用proxy和reflect实现响应系统，替代了Object.defineProperty
-      - 可以监听数组变化和对象的删除/添加
-  - 2、支持多根节点
-  - 3、引入了Teleport组件
-    - 允许将组件渲染到指定的DOM节点中
-  - 4、声明周期变化
-  - 5、vue3的异步组件需要使用defineAsyncComponent来定义
-  - 6、typescript支持
-  - 7、更好的tree-shaking支持
-  - 8、Suspense组件
-    - 用于协调异步组件的加载
-    ```vue
-      <Suspense>
-        <template #default>
-          <AsyncComponent />
-        </template>
-        <template #fallback>
-          Loading...
-        </template>
-      </Suspense>
-    ```
+
 
 ## vue3性能提升方面
   - 编译阶段
@@ -820,11 +831,6 @@
         }
       }
     ```
-
-## vue2如何实现对数组和对象的响应式
-  - vue2中，对数组和对象的响应式是通过Object.defineProperty()方法实现的，对对象进行响应式处理时，会遍历对象的所有属性，对每个属性都调用Object.defineProperty()方法，对数组进行响应式处理时，会遍历数组的所有元素，对每个元素都调用Object.defineProperty()方法，这样就实现了对数组和对象的响应式处理。对数组是通过重写数组方法来实现的数组的响应式的。
-  - vue3是使用proxy来实现对象和数组的响应式
-  - vue2中对新增对象属性的处理：this.$set(this.obj, 'newKey', 'newValue'), Object.assign(),computed，forceUpdate()
 
 ## 按需加载(也称为懒加载或动态导入)
   - 是一种优化技术，用于减少初始加载时间和提高应用性能

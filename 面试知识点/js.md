@@ -1833,7 +1833,7 @@
 
     ```
 
-    使用 Web Workers 优化性能
+    使用 Web Workers: 后台脚本执行，用于优化性能
 
     ```javascript
       // main.js
@@ -2489,7 +2489,7 @@
     document.body.appendChild(script);
 
   ```
-  - 代理服务器 在同源的服务器上创建一个代理，由它来请求跨域资源
+  - 代理服务器 proxy 在同源的服务器上创建一个代理，由它来请求跨域资源
   - postMessage 用于不同窗口间的通信
   ```javascript
     // 发送消息
