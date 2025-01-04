@@ -93,6 +93,7 @@
 
 ## living coding
   ```javascript
+    "use strict";
     // 自定义错误类，用于处理"数据不足"的情况
     class CustomError extends Error {
       constructor(message) {

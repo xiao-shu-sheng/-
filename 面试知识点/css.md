@@ -129,7 +129,28 @@
       }
     ```
   - Sticky 定位: 元素通过 sticky 定位，使元素在页面中固定位置，当元素到达指定位置时，元素会固定在页面中，不再随着页面滚动
+  ```css
+    .sticky {
+      position: sticky;
+      top: 0;
+      background-color: #f1f1f1;
+      padding: 10px;
+    }
+  ```
   - Table 布局: 元素通过 table 布局，将页面划分为多个表格，并调整元素的位置和大小
+  ```css
+   .container {
+      display: table;
+      width: 100%;
+    }
+    .row {
+      display: table-row;
+    }
+   .cell {
+      display: table-cell;
+      padding: 10px;
+    }
+  ```
 
 ## em、px、rem、vh、vw的区别
   - em：相对于当前元素的字体大小

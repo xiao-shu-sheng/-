@@ -173,3 +173,29 @@
       };
     ```
  
+## webpack拆包
+  ```javascript
+    module.exports = {
+    entry: {
+      main: './src/index.js',
+      vendor: './src/vendor.js'
+    },
+    output: {
+      filename: '[name].[contenthash].js',
+      path: path.resolve(__dirname, 'dist')
+    },
+    optimization: {
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all'
+          }
+        }
+      }
+    }
+  };
+
+  ```
