@@ -300,6 +300,10 @@
 ## css优化
   - 内联首屏关键CSS
   - 异步加载CSS
+  ```css
+    <link rel="preload" href="styles.css" as="style" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="styles.css"></noscript>
+  ```
   - 资源压缩
   - 不要使用@import
 
