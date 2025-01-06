@@ -698,18 +698,19 @@
   ```
   - 组件级错误处理 可以用来在组件内报告错误：
   ```javascript
-    import { defineComponent } from 'vue'
-    export default defineComponent({
-      setup(props, { emit }) {
-        // ...
-      },
-      render() {
-        // ...
-      },
-      onError(err, instance, info) {
-        // 向追踪服务报告错误
+    import { onErrorCaptured } from 'vue';
+
+    export default {
+      setup() {
+        onErrorCaptured((err, instance, info) => {
+          // 处理错误
+          console.error('Component error:', err, instance, info);
+          // 返回false以阻止错误继续向上传播
+          return false;
+        });
       }
-    })
+    };
+
   ```
   - Sentry和Bugsnag也提供了Vue的插件，可以用来追踪运行时错误
 
