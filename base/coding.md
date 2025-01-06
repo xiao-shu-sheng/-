@@ -136,3 +136,26 @@
     }
 
   ```
+
+## 虚拟dom转换为真实的dom
+```javascript
+function createRealDom(vnode) {
+  // 创建节点
+  const element = document.createElement(vnode.tag)
+  // 设置属性
+  if (vnode.attrs) {
+    for (const (key, value) of vnode.attrs.entries()) {
+      element.setAttribute(key, value)
+    }
+  }
+  // 添加子节点
+  if(vnode.children) {
+    vnode.children.forEach(i => {
+      element.appendChild(document.createElement(i.tag))
+    })
+  }
+}
+
+const str = createRealDom(vnode)
+console.log(str)
+```

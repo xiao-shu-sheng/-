@@ -200,7 +200,7 @@
             })
           ],
         })
-        ```
+      ```
       webpack:
       ```vue
         const CompressionPlugin = require('compression-webpack-plugin')
@@ -214,7 +214,7 @@
             })
           ]
         }
-        ```
+      ```
     - 3、静态资源本地缓存
     - 4、图片优化
     - 5、服务端渲染 (SSR) 使用 Nuxt.js (Vue) 或 Next.js (React) 等框架实现服务端渲染
@@ -303,12 +303,12 @@
     - 停止监听：
       - 两者都返回一个停止函数，可以用来停止监听
       ```vue
-      `const stop = watchEffect(() => {
-        // ...
-      })
-      // 停止监听：
-      stop()
-    ````
+        const stop = watchEffect(() => {
+          // ...
+        })
+        // 停止监听：
+        stop()
+      ````
 
 ## watch和watchEffect默认是异步执行的，但是可以通过flush选项来指定同步执行
   - watchEffect(callback, { flush: 'sync' })
